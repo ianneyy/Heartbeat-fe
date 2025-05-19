@@ -1,29 +1,74 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import React, { useEffect, useState } from "react";
+import { View } from "react-native";
+import BPMCircle from "../components/BPMCircle";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import LoginScreen from "../src/screens/LoginScreen";
+import RegisterScreen from "../src/screens/RegisterScreen";
+import DashboardScreen from "../src/screens/DashboardScreen";
+import ProfileScreen from "../src/screens/PorfileScreen";
+import { UserProvider } from "../src/context/UserContext";
+
+
+const Stack = createStackNavigator();
+
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  // const [pulse, setPulse] = useState(0);
+  // const [loading, setLoading] = useState(true);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
+  // const fetchBPM = async () => {
+  //   try {
+  //     const response = await fetch("http://192.168.186.193:3000/bpm"); // replace with your real API URL
+  //     const json = await response.json();
+  //      if (response.ok) {
+  //        setPulse(json.bpm); // Update the state with the 'bpm' value from the response
+  //      } else {
+  //        console.error("Failed to fetch BPM:", json);
+  //      }
+  //   } catch (error) {
+  //     console.error("Error fetching BPM:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchBPM(); // fetch once on mount
+  //   const interval = setInterval(fetchBPM, 500); // fetch every 5 seconds
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    //   <BPMCircle bpm={pulse} />
+    // </View>
+
+    <UserProvider>
+      <Stack.Navigator initialRouteName="Dashboard">
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ title: "My Profile" }}
+        />
+      </Stack.Navigator>
+    </UserProvider>
   );
 }
