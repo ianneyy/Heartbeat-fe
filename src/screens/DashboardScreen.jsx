@@ -1,84 +1,59 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { useUser } from "../context/UserContext";
-import BPMCircle from "../../components/BPMCircle";
-
-// Heart rate component with animation
-
+import { Text } from "@/components/ui/text"
+import { useEffect, useState } from "react"
+import { Alert, SafeAreaView, ScrollView, StyleSheet, View } from "react-native"
+import HeartbeatAnimation from "../../components/Heart"
+import Beat from "../../components/Beat"
+import { useUser } from "../context/UserContext"
 
 const DashboardScreen = ({ navigation }) => {
-  const { user, logout } = useUser();
-  const [heartRate, setHeartRate] = useState(0);
-  const [heartStatus, setHeartStatus] = useState("normal");
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [loading, setLoading] = useState(true);
-  
+  const { user, logout } = useUser()
+  const [heartRate, setHeartRate] = useState(102)
+  const [heartStatus, setHeartStatus] = useState("")
+  const [lastUpdated, setLastUpdated] = useState(new Date())
+  const [loading, setLoading] = useState(true)
+
   const fetchBPM = async () => {
     try {
-      const response = await fetch("http://192.168.186.193:3000/bpm"); // replace with your real API URL
-      const json = await response.json();
+      const response = await fetch("http://192.168.186.193:3000/bpm") // replace with your real API URL
+      const json = await response.json()
       if (response.ok) {
-        setHeartRate(json.bpm); // Update the state with the 'bpm' value from the response
+        setHeartRate(json.bpm) // Update the state with the 'bpm' value from the response
       } else {
-        console.error("Failed to fetch BPM:", json);
+        console.error("Failed to fetch BPM:", json)
       }
     } catch (error) {
-      console.error("Error fetching BPM:", error);
+      console.error("Error fetching BPM:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
   useEffect(() => {
-    fetchBPM();
-    const interval = setInterval(fetchBPM, 500);
-    return () => clearInterval(interval);
-  }, []);
-  
-  // Simulate IoT device sending heart rate data
+    fetchBPM()
+    const interval = setInterval(fetchBPM, 500)
+    return () => clearInterval(interval)
+  }, [])
+
   useEffect(() => {
-    // fetchBPM();
-
-    // const interval = setInterval(fetchBPM, 500); // fetch every 5 seconds
-
-
     // Check if heart rate is abnormal
     if (heartRate > 100) {
-      setHeartStatus("high");
-      showAlert(
-        "High Heart Rate Detected",
-        `Your heart rate is ${heartRate} BPM, which is above normal range.`
-      );
+      setHeartStatus("high")
+      showAlert("High Heart Rate Detected", `Your heart rate is ${heartRate} BPM, which is above normal range.`)
     } else if (heartRate < 60) {
-      setHeartStatus("low");
-      showAlert(
-        "Low Heart Rate Detected",
-        `Your heart rate is ${heartRate} BPM, which is below normal range.`
-      );
+      setHeartStatus("low")
+      showAlert("Low Heart Rate Detected", `Your heart rate is ${heartRate} BPM, which is below normal range.`)
     } else {
-      setHeartStatus("normal");
+      setHeartStatus("normal")
     }
-    setLastUpdated(new Date());
-
-    // }, 5000); // Update every 5 seconds
-
-  
-  }, [heartRate]);
+    setLastUpdated(new Date())
+  }, [heartRate])
 
   const showAlert = (title, message) => {
     // In a real app, this would be a push notification
-    Alert.alert(title, message);
-  };
+    Alert.alert(title, message)
+  }
 
   const formatTime = (date) => {
     return date.toLocaleTimeString("en-PH", {
@@ -86,211 +61,119 @@ const DashboardScreen = ({ navigation }) => {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    });
-  };
+    })
+  }
+
+  const getStatusColor = () => {
+    switch (heartStatus) {
+      case "normal":
+        return { bg: "bg-emerald-100", border: "border-emerald-500", text: "text-emerald-700" }
+      case "high":
+        return { bg: "bg-rose-100", border: "border-rose-500", text: "text-rose-700" }
+      case "low":
+        return { bg: "bg-sky-100", border: "border-sky-500", text: "text-sky-700" }
+      default:
+        return { bg: "bg-gray-100", border: "border-gray-500", text: "text-gray-700" }
+    }
+  }
+
+  const getStatusMessage = () => {
+    if (heartStatus === "normal") {
+      return "Your heart rate is within the normal range (60-100 BPM)."
+    } else if (heartStatus === "high") {
+      return "Your heart rate is above normal. Consider resting or consulting a doctor if this persists."
+    } else {
+      return "Your heart rate is below normal. This may be normal for athletes, but consider consulting a doctor if you feel unwell."
+    }
+  }
+
+  const statusColors = getStatusColor()
 
   return (
-    <SafeAreaView style={styles.container}>
-      
-
-      <ScrollView style={styles.content}>
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>Welcome, {user?.name}</Text>
-          <Text style={styles.subtitleText}>Your heart health dashboard</Text>
+    <SafeAreaView style={styles.container} className=" ">
+      <ScrollView className="bg-gray-800 p-6 ">
+        {/* Header Section */}
+        <View className="mt-10 mb-8 flex items-center">
+          <Text className="text-4xl font-bold text-white mb-2">Monitor Your <Text className="text-red-500">Heart Rate</Text></Text>
+          <Text className="text-slate-400 text-lg">Your heart health dashboard</Text>
         </View>
 
-        <BPMCircle bpm={heartRate} status={heartStatus} />
+        {/* Main Heart Rate Card */}
+        <View className="bg-gray-600 rounded-2xl overflow-hidden mb-6  border-2 border-gray-500">
+          {/* Heart Animation Section */}
+          <View className="mt-10">
+            <HeartbeatAnimation bpm={heartRate} status={heartStatus} />
+          </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoCardTitle}>Last Updated</Text>
-          <Text style={styles.infoCardValue}>{formatTime(lastUpdated)}</Text>
+         
+            <Beat status={heartStatus} />
+
+          {/* Heart Rate Stats */}
+          <View className="flex flex-row justify-between px-6 py-4 mt-5">
+            <View className="flex-1 items-center border-r border-slate-200 pr-4">
+              <Text className="text-slate-100 font-bold text-xl">{formatTime(lastUpdated)}</Text>
+              <Text className="text-slate-300 text-sm">Last Updated</Text>
+            </View>
+
+            <View className="flex-1 items-center pl-4">
+              <Text
+                className={`font-bold text-xl ${
+                  heartStatus === "normal"
+                    ? "text-green-400"
+                    : heartStatus === "high"
+                      ? "text-rose-600"
+                      : "text-sky-600"
+                }`}
+              >
+                {heartStatus === "normal" ? "Normal" : heartStatus === "high" ? "Above Normal" : "Below Normal"}
+              </Text>
+              <Text className="text-slate-300 text-sm">Heart Rate Status</Text>
+            </View>
+          </View>
+
+          {/* Status Message */}
+          <View className={`mx-6 mb-6 px-4 py-3 rounded-lg ${statusColors.bg} border-l-4 ${statusColors.border}`}>
+            <Text className={`${statusColors.text}`}>{getStatusMessage()}</Text>
+          </View>
         </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoCardTitle}>Heart Rate Status</Text>
-          <Text
-            style={[
-              styles.infoCardValue,
-              heartStatus === "normal"
-                ? styles.normalText
-                : heartStatus === "high"
-                ? styles.highText
-                : styles.lowText,
-            ]}
-          >
-            {heartStatus === "normal"
-              ? "Normal"
-              : heartStatus === "high"
-              ? "Above Normal"
-              : "Below Normal"}
-          </Text>
-          <Text style={styles.infoCardDescription}>
-            {heartStatus === "normal"
-              ? "Your heart rate is within the normal range (60-100 BPM)."
-              : heartStatus === "high"
-              ? "Your heart rate is above normal. Consider resting or consulting a doctor if this persists."
-              : "Your heart rate is below normal. This may be normal for athletes, but consider consulting a doctor if you feel unwell."}
-          </Text>
+        {/* Health Tips Card */}
+        <View className="bg-gray-600 rounded-2xl overflow-hidden mb-20 border-2 border-gray-500">
+          <View className="px-6 pt-5 bg-gradient-to-r from-purple-500 to-indigo-600">
+            <Text className="text-xl font-bold text-gray-100">Health Tips</Text>
+          </View>
+          <View className="p-6">
+            <View className="flex flex-row items-start mb-3">
+              <View className="h-2 w-2 rounded-full bg-purple-500 mt-2 mr-3"></View>
+              <Text className="text-slate-200 flex-1">Stay hydrated throughout the day</Text>
+            </View>
+            <View className="flex flex-row items-start mb-3">
+              <View className="h-2 w-2 rounded-full bg-purple-500 mt-2 mr-3"></View>
+              <Text className="text-slate-200 flex-1">Aim for 7-8 hours of sleep</Text>
+            </View>
+            <View className="flex flex-row items-start mb-3">
+              <View className="h-2 w-2 rounded-full bg-purple-500 mt-2 mr-3"></View>
+              <Text className="text-slate-200 flex-1">Regular exercise helps maintain heart health</Text>
+            </View>
+            <View className="flex flex-row items-start">
+              <View className="h-2 w-2 rounded-full bg-purple-500 mt-2 mr-3"></View>
+              <Text className="text-slate-200  flex-1">Reduce stress through meditation or relaxation</Text>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.tipsCard}>
-          <Text style={styles.tipsCardTitle}>Health Tips</Text>
-          <Text style={styles.tipItem}>• Stay hydrated throughout the day</Text>
-          <Text style={styles.tipItem}>• Aim for 7-8 hours of sleep</Text>
-          <Text style={styles.tipItem}>
-            • Regular exercise helps maintain heart health
-          </Text>
-          <Text style={styles.tipItem}>
-            • Reduce stress through meditation or relaxation
-          </Text>
-        </View>
+        {/* BPM History Card - Placeholder for future feature */}
+       
       </ScrollView>
     </SafeAreaView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#0f172a", // slate-900
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 15,
-    backgroundColor: "#3498db",
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  headerButtons: {
-    flexDirection: "row",
-  },
-  profileButton: {
-    marginRight: 10,
-    padding: 8,
-    backgroundColor: "transparent",
-    borderRadius: 5,
-  },
-  profileButtonText: {
-    color: "#fff",
-    fontWeight: "500",
-  },
-  logoutButton: {
-    padding: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 5,
-  },
-  logoutButtonText: {
-    color: "#fff",
-    fontWeight: "500",
-  },
-  content: {
-    flex: 1,
-    padding: 15,
-  },
-  welcomeSection: {
-    marginBottom: 20,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#2c3e50",
-  },
-  subtitleText: {
-    fontSize: 16,
-    color: "#7f8c8d",
-    marginTop: 5,
-  },
-  heartRateContainer: {
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  heartRateCircle: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    borderWidth: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  bpmText: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: "#2c3e50",
-  },
-  bpmLabel: {
-    fontSize: 16,
-    color: "#7f8c8d",
-  },
-  statusText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  infoCard: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    marginTop: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  infoCardTitle: {
-    fontSize: 16,
-    color: "#7f8c8d",
-    marginBottom: 5,
-  },
-  infoCardValue: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 5,
-  },
-  infoCardDescription: {
-    fontSize: 14,
-    color: "#7f8c8d",
-    lineHeight: 20,
-  },
-  normalText: {
-    color: "#2ecc71",
-  },
-  highText: {
-    color: "#e74c3c",
-  },
-  lowText: {
-    color: "#3498db",
-  },
-  tipsCard: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  tipsCardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 10,
-  },
-  tipItem: {
-    fontSize: 14,
-    color: "#2c3e50",
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-});
+})
 
-export default DashboardScreen;
+export default DashboardScreen

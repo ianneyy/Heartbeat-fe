@@ -5,6 +5,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "tailwind.config": [
+        "./tailwind.config.js"
       ]
     }
   },
@@ -12,6 +15,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "src/screens/DashboardScreen.jsx", "src/screens/LoginScreen.jsx", "src/screens/RegisterScreen.jsx", "src/screens/PorfileScreen.jsx"  ]
+    "expo-env.d.ts",
+    "src/screens/DashboardScreen.jsx",
+    "src/screens/LoginScreen.jsx",
+    "src/screens/RegisterScreen.jsx",
+    "src/screens/PorfileScreen.jsx",
+    "nativewind-env.d.ts"
+  ]
 }
